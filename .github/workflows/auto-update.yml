@@ -2,7 +2,7 @@ name: 稀土行情自动更新
 on:
   push:
   schedule:
-    - cron: '0 8 * * *'  # 每天早上8点自动爬取更新
+    - cron: '0 8 * * *'  # 每天早上8点自动更新
   workflow_dispatch:
 
 jobs:
@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # 关键：保留权限凭证，让git能push
 
       - name: 配置Python环境
         uses: actions/setup-python@v5
@@ -22,8 +24,8 @@ jobs:
 
       - name: 提交更新数据
         run: |
-          git config --global user.name "AutoBot"
-          git config --global user.email "bot@example.com"
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
           git add data.json
-          git commit -m "自动更新今日稀土行情"
+          git commit -m "自动更新今日稀土行情 $(date +'%Y-%m-%d')" || echo "没有新数据，无需提交"
           git push
