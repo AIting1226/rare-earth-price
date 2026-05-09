@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="refresh" content="3600">
     <title>稀土价格行情日周月排行</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
@@ -18,8 +17,8 @@
         th{background:#2E7D32;color:#fff;padding:10px 5px;font-size:14px;text-align:center;}
         td{padding:10px 5px;font-size:14px;text-align:center;border-bottom:1px solid #eee;}
         tr:nth-child(even){background:#f9f9f9;}
-        .up{color:#388E3C;}
-        .down{color:#D32F2F;}
+        .up{color:#388E3C;font-weight:bold;}
+        .down{color:#D32F2F;font-weight:bold;}
         .flat{color:#666;}
         .content{display:none;}
         .content.active{display:block;}
@@ -32,7 +31,7 @@
         <div class="tab-item" onclick="switchTab('week')">周排行</div>
         <div class="tab-item" onclick="switchTab('month')">月排行</div>
     </div>
-    <div class="time">更新时间：<span id="updateTime"></span></div>
+    <div class="time">更新时间：<span id="updateTime">加载中...</span></div>
 
     <div id="day" class="content active">
         <table>
@@ -42,6 +41,7 @@
             <tbody id="dayBody"></tbody>
         </table>
     </div>
+
     <div id="week" class="content">
         <table>
             <thead>
@@ -50,6 +50,7 @@
             <tbody id="weekBody"></tbody>
         </table>
     </div>
+
     <div id="month" class="content">
         <table>
             <thead>
@@ -60,7 +61,6 @@
     </div>
 
     <script>
-        // 标签切换
         function switchTab(id){
             document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
@@ -68,9 +68,45 @@
             event.target.classList.add('active');
         }
 
-        // 模拟加载数据 后续爬虫自动写入
-        window.onload = function(){
-            document.getElementById('updateTime').innerText = new Date().toLocaleString();
+        // 自动读取爬虫数据
+        window.onload = async function(){
+            let res = await fetch("data.json");
+            let data = await res.json();
+            document.getElementById("updateTime").innerText = data.update_time;
+
+            // 渲染日榜
+            let dayHtml = "";
+            data.day.forEach((item,idx)=>{
+                dayHtml += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.price}</td>
+                    <td class="${item.class}">${item.change}</td>
+                </tr>`;
+            });
+            document.getElementById("dayBody").innerHTML = dayHtml;
+
+            // 渲染周榜
+            let weekHtml = "";
+            data.week.forEach((item,idx)=>{
+                weekHtml += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${item.name}</td>
+                    <td class="${item.class}">${item.change}</td>
+                </tr>`;
+            });
+            document.getElementById("weekBody").innerHTML = weekHtml;
+
+            // 渲染月榜
+            let monthHtml = "";
+            data.month.forEach((item,idx)=>{
+                monthHtml += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${item.name}</td>
+                    <td class="${item.class}">${item.change}</td>
+                </tr>`;
+            });
+            document.getElementById("monthBody").innerHTML = monthHtml;
         }
     </script>
 </body>
