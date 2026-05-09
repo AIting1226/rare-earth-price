@@ -1,0 +1,29 @@
+name: 稀土行情自动更新
+on:
+  push:
+  schedule:
+    - cron: '0 8 * * *'  # 每天早上8点自动爬取更新
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取仓库代码
+        uses: actions/checkout@v4
+
+      - name: 配置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 运行爬虫更新数据
+        run: python crawl.py
+
+      - name: 提交更新数据
+        run: |
+          git config --global user.name "AutoBot"
+          git config --global user.email "bot@example.com"
+          git add data.json
+          git commit -m "自动更新今日稀土行情"
+          git push
